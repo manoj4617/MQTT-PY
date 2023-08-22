@@ -1,4 +1,10 @@
-version: '3'
+version: '3.8'
+
+###### All of them share the same network ########
+networks:
+  mosquitto-net:
+    name: mqtt-py
+    driver: bridge
 
 services:
 ############## MQTT broker Container ###############
@@ -15,14 +21,14 @@ services:
       - ./mosquitto/log:/mosquitto/log
 
     networks:
-      - mqtt-py
+      - mosquitto-net
 
 ############## Publisher Container ###############
   publisher:
     build:
       context: ./Publisher
     networks:
-      - mqtt-py
+      - mosquitto-net
 
 ############## Subscriber Container ###############
   subscriber:
@@ -30,7 +36,7 @@ services:
       context: ./Subscriber
 
     networks:
-      - mqtt-py
+      - mosquitto-net
 
 ################## Database ######################
   mqttmongodb:
@@ -39,12 +45,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - Database/mongodb:/data/db
+      - ./Database/mongodb:/data/db
     networks:
-      - mqtt-py
+      - mosquitto-net
 
-###### All of them share the same network ########
-networks:
-  mosquitto:
-    name: mqtt-py
-    driver: bridge
