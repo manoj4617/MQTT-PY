@@ -8,7 +8,7 @@ WORKDIR /mqtt_subscriber
 COPY . /mqtt_subscriber
 
 # Install any needed packages specified in requirements.txt
-RUN pip install paho-mqtt redis-py
+RUN pip install paho-mqtt redis[hiredis] pymongo
 
 # Run mqtt_subscriber.py when the container launches
 CMD ["python", "subscriber.py"]

@@ -8,7 +8,7 @@ WORKDIR /mqtt_publisher
 COPY . /mqtt_publisher
 
 # Install any needed packages specified in requirements.txt
-RUN pip install paho-mqtt pymongo
+RUN pip install paho-mqtt 
 
 # Run mqtt_publisher.py when the container launches
 CMD ["python", "publisher.py"]

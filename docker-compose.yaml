@@ -29,6 +29,8 @@ services:
       context: ./Publisher
     networks:
       - mosquitto-net
+    depends_on:
+      - mosquitto
 
 ############## Subscriber Container ###############
   subscriber:
@@ -37,6 +39,8 @@ services:
 
     networks:
       - mosquitto-net
+    depends_on:
+      - mosquitto
 
 ################## Database ######################
   mqttmongodb:
@@ -48,4 +52,6 @@ services:
       - ./Database/mongodb:/data/db
     networks:
       - mosquitto-net
+    depends_on:
+      - subscriber
 
