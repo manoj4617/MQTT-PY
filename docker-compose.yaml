@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+############## MQTT broker Container ###############
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+        - 1883:1883
+        - 8883:8883
+        - 9001:9001
+    
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
+    networks:
+      - mqtt-py
+
+############## Publisher Container ###############
+  publisher:
+    build:
+      context: ./Publisher
+    networks:
+      - mqtt-py
+
+############## Subscriber Container ###############
+  subscriber:
+    build:
+      context: ./Subscriber
+
+    networks:
+      - mqtt-py
+
+################## Database ######################
+  mqttmongodb:
+    image: mongo:latest
+    container_name: mqtt-mongodb
+    ports:
+      - 27017:27017
+    volumes:
+      - Database/mongodb:/data/db
+    networks:
+      - mqtt-py
+
+###### All of them share the same network ########
+networks:
+  mosquitto:
+    name: mqtt-py
+    driver: bridge
