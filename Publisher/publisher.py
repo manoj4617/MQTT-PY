@@ -5,14 +5,13 @@ import json
 import uuid
 
 
-broker_addr         = "tcp://mosquitto"
+broker_addr         = "tcp://mqtt-broker"
 port                = 1883
 
 temperature_topic   = "sensor/temperature"
 humidity_topic      = "sensor/humidity"
 
 client = mqtt.Client("Publisher")
-
 
 def on_publish(client, userdata, mid):
     print(f"Message published with MID {mid}")

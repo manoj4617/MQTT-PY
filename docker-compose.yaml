@@ -10,6 +10,7 @@ services:
 ############## MQTT broker Container ###############
   mosquitto:
     image: eclipse-mosquitto:2
+    container_name: mqtt-broker
     ports:
         - 1883:1883
         - 8883:8883
@@ -25,6 +26,7 @@ services:
 
 ############## Publisher Container ###############
   publisher:
+    container_name: mqtt-publisher
     build:
       context: ./Publisher
     networks:
@@ -32,6 +34,7 @@ services:
 
 ############## Subscriber Container ###############
   subscriber:
+    container_name: mqtt-subscriber
     build:
       context: ./Subscriber
 
