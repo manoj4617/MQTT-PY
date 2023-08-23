@@ -5,16 +5,16 @@ import json
 import uuid
 
 
-broker_addr         = "mqtt://mosquitto"
+broker_addr         = "tcp://mosquitto"
 port                = 1883
 
-temperature_topic   = "sensor/tempperature"
+temperature_topic   = "sensor/temperature"
 humidity_topic      = "sensor/humidity"
 
 client = mqtt.Client("Publisher")
 
 
-def on_publish(mid):
+def on_publish(client, userdata, mid):
     print(f"Message published with MID {mid}")
 
 
@@ -38,8 +38,8 @@ client.loop_start()
 try:
     while True:
         sensor_data = {
-            "sensor_id" : str(uuid.uuid4()),
-            "value" :  round(random(20,30),4),
+            "sensor_id" : str(uuid.uuid4().hex),
+            "value" :  round(random.uniform(20,30),4),
             "timestamp" :time.strftime("%Y-%m-%dT%H:%M:%S")
         }
 
@@ -49,8 +49,8 @@ try:
             print(f"Failed to publish temperature data with MID: {mid}")
 
         # modify message for humidity sensors
-        sensor_data["sensor_id"] = str(uuid.uuid4())
-        sensor_data["value"] = round(random(40, 60), 4)
+        sensor_data["sensor_id"] = str(uuid.uuid4().hex)
+        sensor_data["value"] = round(random.uniform(40, 60), 4)
 
         (result,mid) = publish_message(humidity_topic, sensor_data)
         if result != mqtt.MQTT_ERR_SUCCESS:

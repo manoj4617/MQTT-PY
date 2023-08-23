@@ -1,17 +1,17 @@
 import paho.mqtt.client as mqtt
-import pymongo as MongoClient
+from pymongo import MongoClient
 import random
 import time
 import json
 
 
-broker_addr         = "mqtt://mosquitto"
+broker_addr         = "tcp://mosquitto"
 port                = 1883
 
 temperature_topic   = "sensor/tempperature"
 humidity_topic      = "sensor/humidity"
 
-mongo_uri           = "mongodb://mqttmongodb:27017/"
+mongo_uri           = "mongodb://mqtt-mongodb:27017"
 mongo_client        = MongoClient(mongo_uri)
 db                  = mongo_client["sensor_data"]
 

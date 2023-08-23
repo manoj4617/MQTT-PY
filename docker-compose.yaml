@@ -16,9 +16,9 @@ services:
         - 9001:9001
     
     volumes:
-      - ./mosquitto/config:/mosquitto/config
-      - ./mosquitto/data:/mosquitto/data
-      - ./mosquitto/log:/mosquitto/log
+      - ./mosquitto/config:/mosquitto/config:rw
+      - ./mosquitto/data:/mosquitto/data:rw
+      - ./mosquitto/log:/mosquitto/log:rw
 
     networks:
       - mosquitto-net
@@ -29,8 +29,6 @@ services:
       context: ./Publisher
     networks:
       - mosquitto-net
-    depends_on:
-      - mosquitto
 
 ############## Subscriber Container ###############
   subscriber:
@@ -39,8 +37,6 @@ services:
 
     networks:
       - mosquitto-net
-    depends_on:
-      - mosquitto
 
 ################## Database ######################
   mqttmongodb:
@@ -52,6 +48,4 @@ services:
       - ./Database/mongodb:/data/db
     networks:
       - mosquitto-net
-    depends_on:
-      - subscriber
 
