@@ -6,20 +6,20 @@ import redis
 broker_addr         = "mosquitto"
 port                = 1883
 
-temperature_topic   = "sensor/tempperature"
+temperature_topic   = "sensor/temperature"
 humidity_topic      = "sensor/humidity"
 
 mongo_uri           = "mongodb://mqtt-mongodb:27017"
 mongo_client        = MongoClient(mongo_uri)
 db                  = mongo_client["sensor_data"]
 
-redis_host          = "redis"
+redis_host          = "redis-mqtt"
 redis_port          = 6379
 redis_client        = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
 
-def save_latest_ten_messages(payload):
+def save_latest_ten_messages(sensor_id, value, timestamp):
     # inserts message to the front of the list
-    redis_client.lpush("latest_sensor_readings", payload)
+    redis_client.lpush("latest_sensor_readings", f"sensor_id:{sensor_id} value:{value} timestamp: {timestamp}")
 
     # when a new message is inserted using the above lpush method
     # it is inserted at the begining and it is trimmed using
@@ -29,7 +29,7 @@ def save_latest_ten_messages(payload):
 
 
 def get_latest_messages():
-    latest_messages = redis_client.lrange("latest_messages", 0, 9)
+    latest_messages = redis_client.lrange("latest_sensor_readings", 0, 9)
     return latest_messages
 
 
@@ -44,9 +44,8 @@ def save_to_db(message):
     print(f"Saved {collection_name} data to Database. Payload: {payload}")
 
     # save into in-memory-database
-    save_latest_ten_messages(payload)
+    save_latest_ten_messages(payload["sensor_id"], payload["value"], payload["timestamp"])
     print(f"Saved Payload: {payload} to redis")
-
     
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
