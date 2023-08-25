@@ -5,7 +5,7 @@ import time
 import json
 
 
-broker_addr         = "tcp://mqtt-broker"
+broker_addr         = "mosquitto"
 port                = 1883
 
 temperature_topic   = "sensor/tempperature"
