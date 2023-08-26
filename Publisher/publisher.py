@@ -37,7 +37,7 @@ client.loop_start()
 try:
     while True:
         sensor_data = {
-            "sensor_id" : str(uuid.uuid4().hex),
+            "sensor_id" : "sensor_" + str(round(random.uniform(10,20))),
             "value" :  round(random.uniform(20,30),4),
             "timestamp" :time.strftime("%Y-%m-%dT%H:%M:%S")
         }
