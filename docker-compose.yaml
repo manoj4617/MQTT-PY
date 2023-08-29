@@ -70,3 +70,5 @@ services:
       context: ./API
     networks:
       - mosquitto-net
+    ports:
+      - "8080:80"

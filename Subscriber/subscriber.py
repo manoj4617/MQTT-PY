@@ -17,22 +17,26 @@ redis_host          = "redis-mqtt"
 redis_port          = 6379
 redis_client        = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
 
-def save_latest_ten_messages(payload, topic_name):
+def save_latest_ten_messages(sensor_id,value,timestamp, topic_name):
+
+    reading = {
+        "sensor_id" : sensor_id,
+        "value" :value,
+        "timestamp" : timestamp
+    }
+
+    # convert the dict to json string
+    json_reading = json.dumps(reading)
+
     # inserts message to the front of the list for a topic
     redis_list_key = f"{topic_name}_sensor_readings"
-    redis_client.lpush(redis_list_key, str(payload))
+    redis_client.lpush(redis_list_key, json_reading)
 
     # when a new message is inserted using the above lpush method
     # it is inserted at the begining and it is trimmed using
     # the below function call, only the first 10 messages
     # are saved 10th message is discarded
     redis_client.ltrim(redis_list_key, 0, 9)
-
-
-def get_latest_messages():
-    latest_messages = redis_client.lrange("latest_sensor_readings", 0, 9)
-    return latest_messages
-
 
 def save_to_db(message):
 
@@ -45,7 +49,7 @@ def save_to_db(message):
     print(f"Saved {collection_name} data to Database. Payload: {payload}")
 
     # save into in-memory-database
-    save_latest_ten_messages(payload, collection_name)
+    save_latest_ten_messages(payload["sensor_id"], payload["value"], payload["timestamp"], collection_name)
     print(f"Saved Payload: {payload} to redis")
     
 def on_connect(client, userdata, flags, rc):

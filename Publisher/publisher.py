@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import random
 import time
 import json
-import uuid
+from datetime import datetime
 
 
 broker_addr         = "mosquitto"
@@ -39,7 +39,7 @@ try:
         sensor_data = {
             "sensor_id" : "sensor_temperature_" + str(round(random.uniform(10,20))),
             "value" :  round(random.uniform(20,30),4),
-            "timestamp" :time.strftime("%Y-%m-%dT%H:%M:%S")
+            "timestamp" : datetime.now().isoformat()
         }
 
         #publish temperature data

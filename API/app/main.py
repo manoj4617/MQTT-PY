@@ -1,6 +1,9 @@
 from typing import Union
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException, Path
 from pymongo import MongoClient
+from datetime import datetime
+import redis
+import json
 
 app = FastAPI()
 
@@ -11,10 +14,45 @@ db                      = mongo_client["sensor_data"]
 temperature_collection  = "temperature"
 humidity_collection     = "hummidity"
 
-@app.get("/get_readings")
-def get_readings_for_range():
-    return
+redis_host              = "redis-mqtt"
+redis_port              = 6379
+redis_client            = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
 
-@app.get("/get_readings/{sensor_id}")
-def get_reading_for_sensor():
-    return
+ALLOWED_SENSOR_TYPES    = {"temperature", "humidity"}
+
+# Endpoint to get sensor readings for a sensor given the timestamp range
+@app.get("/get_readings/{sensor_type}/")
+async def get_readings_for_range( sensor_type: str = Path(..., description="Sensor type"),
+                            start: datetime = Query(..., description="Start timestamp"),
+                            end: datetime = Query(..., description="End timestamp")):
+    try:
+        print(f"sensor_type: {sensor_type}, start: {start}, end: {end}")
+        start_dateTime = datetime.fromisoformat(str(start))
+        end_dateTime = datetime.fromisoformat(str(end))
+
+        print(f"Start date: {start_dateTime}, End Date: {end_dateTime}")
+    except:
+        raise HTTPException(status_code = 400, detail = "Invalid timestamp format")
+    
+    query = {
+        "timestamp": {"$gte": start_dateTime, "$lte": end_dateTime}
+    }
+    print(f"Query: {query}")
+    collection  = db[sensor_type]
+    readings    = list(collection.find(query))
+
+    print(f"Readings from DB: {readings}")
+
+    return readings
+
+# Endpoint to get last ten readings for a sensor form redis
+@app.get("/get_last_ten_readings/{sensor_type}/")
+async def get_reading_for_sensor(sensor_type: str = Path(..., description="Sensor type")):
+    redis_key = f"{sensor_type}_sensor_readings"
+    readings = redis_client.lrange(redis_key, 0, -1)
+
+    print("Readings: ", readings)
+
+    parsed_readings = [json.loads(reading) for reading in readings]
+    
+    return parsed_readings
