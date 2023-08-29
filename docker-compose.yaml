@@ -62,3 +62,11 @@ services:
       - 6379:6379
     networks:
       - mosquitto-net
+
+################### FastAPI ######################
+  fast_api:
+    container_name: fastapi
+    build: 
+      context: ./API
+    networks:
+      - mosquitto-net

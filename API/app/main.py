@@ -15,6 +15,6 @@ humidity_collection     = "hummidity"
 def get_readings_for_range():
     return
 
-@app.get("get_readings/{sensor_id}")
+@app.get("/get_readings/{sensor_id}")
 def get_reading_for_sensor():
     return

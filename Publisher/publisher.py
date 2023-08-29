@@ -37,7 +37,7 @@ client.loop_start()
 try:
     while True:
         sensor_data = {
-            "sensor_id" : "sensor_" + str(round(random.uniform(10,20))),
+            "sensor_id" : "sensor_temperature_" + str(round(random.uniform(10,20))),
             "value" :  round(random.uniform(20,30),4),
             "timestamp" :time.strftime("%Y-%m-%dT%H:%M:%S")
         }
@@ -48,7 +48,7 @@ try:
             print(f"Failed to publish temperature data with MID: {mid}")
 
         # modify message for humidity sensors
-        sensor_data["sensor_id"] = str(uuid.uuid4().hex)
+        sensor_data["sensor_id"] = "sensor_humidity_" + str(round(random.uniform(10,20)))
         sensor_data["value"] = round(random.uniform(40, 60), 4)
 
         (result,mid) = publish_message(humidity_topic, sensor_data)
