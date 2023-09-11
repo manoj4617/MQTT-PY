@@ -20,34 +20,41 @@ redis_client            = redis.StrictRedis(host=redis_host, port=redis_port, de
 
 ALLOWED_SENSOR_TYPES    = {"temperature", "humidity"}
 
+def is_valid_sensor_type(sensor_type: str) -> bool:
+    return sensor_type in ALLOWED_SENSOR_TYPES
+
 # Endpoint to get sensor readings for a sensor given the timestamp range
 @app.get("/get_readings/{sensor_type}/")
 async def get_readings_for_range( sensor_type: str = Path(..., description="Sensor type"),
                             start: datetime = Query(..., description="Start timestamp"),
                             end: datetime = Query(..., description="End timestamp")):
+    
+    if not is_valid_sensor_type(sensor_type):
+        raise HTTPException(status_code=400, detail="Invalid sensor type")
+    
     try:
-        print(f"sensor_type: {sensor_type}, start: {start}, end: {end}")
-        start_dateTime = datetime.fromisoformat(str(start))
-        end_dateTime = datetime.fromisoformat(str(end))
-
-        print(f"Start date: {start_dateTime}, End Date: {end_dateTime}")
-    except:
-        raise HTTPException(status_code = 400, detail = "Invalid timestamp format")
+        start_dateTime = datetime.fromisoformat(str(start)).isoformat()
+        end_dateTime = datetime.fromisoformat(str(end)).isoformat()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid timestamp format")
     
     query = {
         "timestamp": {"$gte": start_dateTime, "$lte": end_dateTime}
     }
-    print(f"Query: {query}")
     collection  = db[sensor_type]
-    readings    = list(collection.find(query))
-
-    print(f"Readings from DB: {readings}")
-
-    return readings
+    
+    readings = list(collection.find(query))
+    serialized_readings = [json.loads(json.dumps(reading, default=str)) for reading in readings]
+   
+    return serialized_readings
 
 # Endpoint to get last ten readings for a sensor form redis
 @app.get("/get_last_ten_readings/{sensor_type}/")
 async def get_reading_for_sensor(sensor_type: str = Path(..., description="Sensor type")):
+
+    if not is_valid_sensor_type(sensor_type):
+        raise HTTPException(status_code=400, detail="Invalid sensor type")
+
     redis_key = f"{sensor_type}_sensor_readings"
     readings = redis_client.lrange(redis_key, 0, -1)
 
